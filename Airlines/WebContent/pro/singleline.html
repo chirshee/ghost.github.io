@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>飞机航线</title>
+<head>
+
+<script type="text/javascript" src="js/echarts.min.js"></script>
+<script type="text/javascript" src="js/echarts-gl.js"></script>
+<script type="text/javascript" src="js/china.js"></script>
+<script type="text/javascript" src="js/world.js"></script>
+<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="css/jquery.fullPage.css"></script>
+<script type="text.javascript" src="css/bootstrap.min.css"></script>
+<script type="text/javascript" src="data/data1.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+<style type="text/css">
+* {
+	margin: 0;
+	padding: 0;
+	font-size: 14px;
+}
+
+.w-1000 {
+	width: 300px;
+	margin: 0 auto;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 10;
+	background:white;
+	float: right;
+}
+
+.sub {
+	margin-left: 10px;
+	float: left;
+	color: yellow;
+}
+
+.sup {
+	margin-left: 10px;
+	float: left;
+	color: yellow;
+}
+</style>
+</head>
+<body>
+	<div class="w-1000">
+		<div class="sub">
+			起始： <select id="start">
+			</select>
+		</div>
+		<div class="sub">
+			结束： <select id="end">
+			</select>
+		</div>
+		<div class="sub">
+			<input id="show" value="show" type="button">
+		</div>
+	</div>
+
+	<div id="section_2" style="height: 700px"></div>
+	<script type="text/javascript" src="data/data1.js"></script>
+	<script type="text/javascript">
+		var datastart = [];
+		var dataend = [];
+		var airSections = airports.slice(0, 1000);
+		/////起点  
+		for (var i = 0; i < airSections.length; i += 2) {
+			datastart.push([ [ airSections[i][1] ],
+					[ airSections[i][3], airSections[i][4] ] ])
+		}
+		$("#start").empty();
+		for (var i = 0; i < datastart.length; i++) {
+			$("#start").append(
+					"<option value="+datastart[i][1]+">" + datastart[i][0]
+							+ "</option>");
+		}
+		//终点
+		for (var i = 1; i < airSections.length; i += 2) {
+			dataend.push([ [ airSections[i][1] ],
+					[ airSections[i][3], airSections[i][4] ] ])
+		}
+		$("#end").empty();
+		for (var i = 0; i < dataend.length; i++) {
+			$("#end").append(
+					"<option value="+dataend[i][1]+">" + dataend[i][0]
+							+ "</option>");
+		}
+		/////全部
+		for (var i = 0; i < airSections.length; i += 2) {
+			datastart.push([ [ airSections[i][1] ],
+					[ airSections[i][3], airSections[i][4] ] ])
+		}
+		$("#all").empty();
+		for (var i = 0; i < datastart.length; i++) {
+			$("#all").append(
+					"<option value="+datastart[i][1]+">" + datastart[i][0]
+							+ "</option>");
+		}
+	</script>
+	<script type="text/javascript">
+		//var startval = getCookie("startval");
+		//var starthtml = getCookie("starthtml");
+		//var endval = getCookie("endval");
+		//var endhtml = getCookie("endhtml");
+
+		var startval = $.cookie("startval");//获取cookie中的数据
+		var starthtml = $.cookie("starthtml");
+		var endval = $.cookie("endval");
+		var endhtml = $.cookie("endhtml");
+
+		var startvalue = startval.split(",");
+		var endvalue = endval.split(",");
+
+		var dom = document.getElementById("section_2");
+		var myChart = echarts.init(dom);
+
+		myChart.showLoading({
+			text : "正在努力加载图表数据..."
+		});
+		var airSection = [ [ starthtml, startvalue[0], startvalue[1] ],
+				[ endhtml, endvalue[0], endvalue[1] ] ];
+
+		var airDatas = [];
+		for (var i = 0; i < airSection.length; i += 2) {
+			airDatas.push([ [ airSection[i][1], airSection[i][2] ],
+					[ airSection[i + 1][1], airSection[i + 1][2] ] ])
+		}
+		var canvas = document.createElement('canvas');
+		var mapChart = echarts.init(canvas, null, {
+
+			width : 2048,
+			height : 1024
+		});
+		mapChart.setOption({
+			geo : {
+				type : 'map',
+				map : 'world',
+				top : 0,
+				left : 0,
+				right : 0,
+				bottom : 0,
+				boundingCoords : [ [ -180, 90 ], [ 180, -90 ] ],
+				itemStyle : {/////////坐标系组件
+					normal : {
+						areaColor : 'transparent',/////图形描边  和描边颜色
+						borderColor : '#fff'
+					},
+					emphasis : {
+						areaColor : '#8CEA00'
+					}
+				}
+			}
+		});
+
+		option = {
+			title : {
+				text : '模拟飞机航线 ',
+				textStyle : {
+					align : 'left',
+					color : 'yellow',
+					verticalAlign : 'bottom',
+					fontStyle : 'oblique',
+					fontSize : 40,
+				},
+				subtext : '--哈尔滨商业大学',
+				subtextStyle : {
+					color : 'yellow',
+					verticalAlign : 'bottom',
+					fontStyle : 'oblique',
+					fontSize : 25
+				}
+			},
+			backgroundColor : 'black',
+			globe : {
+				globeRadius : 80,
+				baseTexture : 'pic/world.topo.bathy.200401.jpg',
+				//heightTexture: 'bathymetry_bw_composite_4k.jpg',					
+				//environment : 'pic/starfield.jpg',
+				displacementScale : 20, //表面突出
+				displacementQuality : 'high', //地表细节的展示
+				shading : 'realistic',
+				//着色 效果 lambert ，color
+				realisticMaterial : {
+					textureTiling : [ 8, 4 ]
+				//材料真实感平铺
+				},
+				postEffect : {
+					enable : true,
+					SSAO : {
+						enable : true,
+						radius : 10
+					},
+					bloom : {
+						show : true,
+						bloomlntensity : 0.2
+					}
+				},
+				viewControl : {
+					autoRotate : true,
+					autoRotateDirection : 'cw', //ccw逆时针
+				},
+
+				light : {
+					main : {
+						shadow : true,
+						intensity : 0.5,
+						shadowQuality : 'ultra'
+					},
+					ambient : {
+						color : 'white',
+						intensity : 0.5
+					//光照强度
+
+					},
+					ambientCubemap : {
+						texture : 'pic/pisa.hdr',
+						diffuseIntensity : 0.1
+					//漫反射
+					}
+				},
+
+				layers : [ { //地表的覆盖层  可以显示云层
+					show : true,
+					//type: 'blend',和basdtexture混合
+					type : 'overlay',
+					texture : mapChart
+				} ]
+			},
+
+			////////////////////////////////数据的显示形式
+
+			series : [ {
+				type : 'lines3D', //是否显示轨迹
+				effect : {
+					show : true,
+					period : 2,
+					trailWidth : 3,
+					trailLength : 1,
+					trailOpacity : 1,
+					trailColor : '#005AB5',
+
+				},
+				lineStyle : {
+					width : 3,
+					color : '#005AB5',
+					opacity : 0.1
+				},
+				blendMode : 'lighter',
+				data : airDatas
+			} ]
+		};
+		myChart.setOption(option);
+		myChart.hideLoading();
+	</script>
+	<script type="text/javascript">
+		$("#show").click(function() {
+			var startval = $("#start").val();
+			var starthtml = $("#start").html();
+			var endval = $("#end").val();
+			var endhtml = $("#end").html();
+			$.cookie("startval", startval, {
+				expires : 7
+			});
+			$.cookie("starthtml", starthtml, {
+				expires : 7
+			});
+			$.cookie("endval", endval, {
+				expires : 7
+			});
+			$.cookie("endhtml", endhtml, {
+				expires : 7
+			});
+			//document.cookie = "startval="+startval; 
+			//document.cookie = "starthtml="+starthtml;
+			//document.cookie = "endval="+endval;
+			//document.cookie = "endhtml="+endhtml;
+			var url = "singleline.html";
+			window.location.href = url;
+		});
+	</script>
+</body>
+</html>
