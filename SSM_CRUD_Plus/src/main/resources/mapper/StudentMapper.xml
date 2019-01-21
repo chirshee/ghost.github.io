@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hyt.dao.StudentMapper" >
+  <resultMap id="BaseResultMap" type="com.hyt.domain.Student" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="CHAR" />
+    <result column="age" property="age" jdbcType="INTEGER" />
+    <result column="sex" property="sex" jdbcType="CHAR" />
+    <result column="address" property="address" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, age, sex, address
+  </sql>
+  
+  <select id="selectStudents" resultMap="BaseResultMap">
+  	select 
+  	<include refid="Base_Column_List" />
+  	from 
+  	stu
+  </select>
+  
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stu
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <!-- 删除  -->
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from stu
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <insert id="insert" parameterType="com.hyt.domain.Student" >
+    insert into stu (id, name, age, sex, 
+      address)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=CHAR}, #{age,jdbcType=INTEGER}, #{sex,jdbcType=CHAR}, 
+      #{address,jdbcType=CHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hyt.domain.Student" >
+    insert into stu
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="age != null" >
+        age,
+      </if>
+      <if test="sex != null" >
+        sex,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=CHAR},
+      </if>
+      <if test="age != null" >
+        #{age,jdbcType=INTEGER},
+      </if>
+      <if test="sex != null" >
+        #{sex,jdbcType=CHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hyt.domain.Student" >
+    update stu
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=CHAR},
+      </if>
+      <if test="age != null" >
+        age = #{age,jdbcType=INTEGER},
+      </if>
+      <if test="sex != null" >
+        sex = #{sex,jdbcType=CHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hyt.domain.Student" >
+    update stu
+    set name = #{name,jdbcType=CHAR},
+      age = #{age,jdbcType=INTEGER},
+      sex = #{sex,jdbcType=CHAR},
+      address = #{address,jdbcType=CHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

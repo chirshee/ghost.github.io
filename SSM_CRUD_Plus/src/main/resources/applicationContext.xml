@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	
+	<context:component-scan base-package="com.hyt.dao"></context:component-scan>
+	<context:component-scan base-package="com.hyt.service"></context:component-scan>
+	<!-- 使用c3p0连接池 -->
+	<context:property-placeholder location="classpath:db.properties" />
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${driver}"></property>
+		<property name="jdbcUrl" value="${url}"></property>
+		<property name="user" value="${user}"></property>
+		<property name="password" value="${password}"></property>
+		<!-- 其他属性 -->
+		<property name="maxPoolSize" value="100"></property>
+	</bean>
+
+
+	<!-- spring管理mybatis 用spring来创建sqlsession对象 -->
+	<bean class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="classpath:config.xml"></property>
+		<!-- ref 引用的是spring管理的连接池 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 存放所有的mapper文件 -->
+		<property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+	</bean>
+	
+	<!-- 让mybatis扫描dao -->
+	<bean id="ScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.hyt.dao"></property>
+	</bean>
+
+
+	<!--开启spring事务管理 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<!-- 加载注解 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+</beans>
